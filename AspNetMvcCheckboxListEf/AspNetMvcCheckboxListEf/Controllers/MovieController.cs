@@ -73,6 +73,7 @@ namespace AspNetMvcCheckboxListEf.Controllers
                     movie.Genres.Clear();
                     foreach (int g in input.SelectedGenres)
                     {
+                        // What is Entity Framework analogous to NHibernate's session.Load<Genre>(g) ?
                         movie.Genres.Add(db.Genres.Find(g));
                     }
 
