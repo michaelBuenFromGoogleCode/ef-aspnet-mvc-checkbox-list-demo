@@ -73,6 +73,7 @@ namespace AspNetMvcCheckboxListEf.Controllers
                     foreach (int g in input.SelectedGenres)
                     {
                         // What is Entity Framework analogous to NHibernate's session.Load<Genre>(g) ?
+                        // db.Genres.Find(g) is not efficient
                         movie.Genres.Add(db.Genres.Find(g));
                     }
 
