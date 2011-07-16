@@ -1,0 +1,44 @@
+﻿@model IEnumerable<AspNetMvcCheckboxListEf.Models.Movie>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Movies</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Input")
+</p>
+<table>
+    <tr>
+        <th>
+            Title
+        </th>
+        <th>
+            Description
+        </th>
+        <th>
+            Year Released
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.MovieName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.MovieDescription)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.YearReleased)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Input", new { id=item.MovieId }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.MovieId })
+        </td>
+    </tr>
+}
+
+</table>
