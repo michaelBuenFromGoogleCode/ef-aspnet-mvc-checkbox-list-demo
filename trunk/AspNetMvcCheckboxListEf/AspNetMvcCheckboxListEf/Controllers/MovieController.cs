@@ -51,8 +51,7 @@ namespace AspNetMvcCheckboxListEf.Controllers
                     input.GenreSelections = db.Genres.AsNoTracking().OrderBy(x => x.GenreName).ToList();
 
 
-                    var movie = !isNew ? db.Movies.Find(input.TheMovie.MovieId) : input.TheMovie;
-                    // var movie = input.TheMovie;
+                    var movie = !isNew ? db.Movies.Find(input.TheMovie.MovieId) : input.TheMovie;                    
 
                     if (isNew)
                         db.Movies.Add(movie);
@@ -102,7 +101,8 @@ namespace AspNetMvcCheckboxListEf.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    ModelState.AddModelError(string.Empty, "The record you attempted to edit was already modified by another user since you last loaded it. Open the latest changes on this record");
+                    ModelState.AddModelError(string.Empty, 
+                        "The record you attempted to edit was already modified by another user since you last loaded it. Open the latest changes on this record");
                 }
             }
 
