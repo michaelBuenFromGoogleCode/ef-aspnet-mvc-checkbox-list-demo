@@ -7,6 +7,7 @@ using AspNetMvcCheckboxListEf.Models;
 using AspNetMvcCheckboxListEf.ViewsModels;
 using System.Data.Objects;
 using System.Data.Entity.Infrastructure;
+using System.Data;
 
 namespace AspNetMvcCheckboxListEf.Controllers
 {
@@ -74,7 +75,9 @@ namespace AspNetMvcCheckboxListEf.Controllers
                     {
                         // What is Entity Framework analogous to NHibernate's session.Load<Genre>(g) ?
                         // db.Genres.Find(g) is not efficient
-                        movie.Genres.Add(db.Genres.Find(g));
+
+
+                        movie.Genres.Add(db.Genres.Where(ct => ct.GenreId == g).First());
                     }
 
                     // http://www.joe-stevens.com/2010/02/17/asp-net-mvc-using-controller-updatemodel-when-using-a-viewmodel/
