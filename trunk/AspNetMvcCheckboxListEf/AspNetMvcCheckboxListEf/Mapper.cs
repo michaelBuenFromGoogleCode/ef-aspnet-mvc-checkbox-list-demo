@@ -8,6 +8,7 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace AspNetMvcCheckboxListEf
 {
+
     public class TheMovieContext : DbContext
     {
         public DbSet<Movie> Movies { get; set; }
@@ -32,6 +33,9 @@ namespace AspNetMvcCheckboxListEf
                 x.MapRightKey("MovieId");
             });
 
+
+            
+            
             base.OnModelCreating(modelBuilder);
         }
 
