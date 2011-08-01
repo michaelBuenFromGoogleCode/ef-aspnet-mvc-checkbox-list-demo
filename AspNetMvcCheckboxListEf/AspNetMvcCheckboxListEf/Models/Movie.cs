@@ -20,9 +20,10 @@ namespace AspNetMvcCheckboxListEf.Models
         [   Required, Display(Name="Year Released"), Range(1900,9999)
         ]   public virtual int? YearReleased { get; set; }
         
-        [ConcurrencyCheck]
+        [Timestamp]
         public virtual byte[] Version { get; set; }
 
         
         public virtual IList<Genre> Genres { get; set; }               
-    }}
+    }
+}

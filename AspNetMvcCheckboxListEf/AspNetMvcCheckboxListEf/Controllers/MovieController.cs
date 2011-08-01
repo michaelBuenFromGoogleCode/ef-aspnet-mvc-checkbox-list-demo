@@ -20,6 +20,7 @@ namespace AspNetMvcCheckboxListEf.Controllers
         {
             using (var db = new TheMovieContext())
             {
+                
                 return View(db.Movies.OrderBy(x => x.MovieName).ToList());
             }
         }
@@ -58,14 +59,17 @@ namespace AspNetMvcCheckboxListEf.Controllers
                         db.Movies.Add(movie);
                     else
                     {
-                        db.Entry(movie).Property("Version").OriginalValue = input.TheMovie.Version;
-                        db.Entry(movie).State = System.Data.EntityState.Unchanged;
+                        db.Entry(movie).Property(x => x.Version).OriginalValue = input.TheMovie.Version;
+
+                        // If you are using ConcurrencyCheck attribute on a Version property, add this code. 
+                        // It's better to use Timestamp attribute, see the Movie class' Version property, we changed it now to Timestamp(was ConcurrencyCheck before)
+                        // db.Entry(movie).State = System.Data.EntityState.Unchanged; 
 
 
                         // dirty this all the time even this is not changed by the user, 
                         // so we have a simplified mechanism for concurrent update 
                         // when the associated Genre(s) is modified
-                        db.Entry(movie).Property("MovieName").IsModified = true;
+                        db.Entry(movie).Property(x => x.MovieName).IsModified = true;
                     }
 
 
@@ -76,13 +80,71 @@ namespace AspNetMvcCheckboxListEf.Controllers
                         // What is Entity Framework analogous to NHibernate's session.Load<Genre>(g) ?
                         // db.Genres.Find(g) is not efficient
 
+                        /*var gx = new Genre { GenreId = g };
+                        db.Entry(gx).State = EntityState.Unchanged;*/
 
-                        movie.Genres.Add(db.Genres.Where(ct => ct.GenreId == g).First());
+
+                        /*if (db.ChangeTracker.Entries().Where(x => ObjectContext.GetObjectType( x.Entity.GetType() ) == typeof(Genre)).Any())
+                            throw new Exception("Working");
+
+                        string sx = string.Join(", ",
+                        db.ChangeTracker.Entries().Where(x => ObjectContext.GetObjectType(x.Entity.GetType()) == typeof(Genre)).Select(x => ((Genre)x.Entity).GenreId.ToString()).ToArray()
+                        );*/
+
+                        /*string sx = string.Join(", ",
+                        db.ChangeTracker.Entries<Genre>().Select(x => x.Entity.GenreId.ToString() + " " + x.State).ToArray());*/
+
+                        /*
+                        if (!db.ChangeTracker.Entries<Genre>().Any(x => x.Entity.GenreId == g))
+                        {
+                            var gx = new Genre { GenreId = g };
+                            movie.Genres.Add(gx);
+                        }
+                        else
+                        {
+                            // db.ChangeTracker.Entries<Genre>().Any(x => x.Entity.GenreId == g)
+                            movie.Genres.Add(db.Genres.Find(g));
+                        }*/
+
+
+                        
+                        var cachedGenre = db.ChangeTracker.Entries<Genre>().SingleOrDefault(x => x.Entity.GenreId == g);
+
+                        Genre gx = null;
+                        if (cachedGenre != null)
+                        {
+                            gx = cachedGenre.Entity;
+                            input.MessageToUser = input.MessageToUser + "Already in cache: " + g.ToString() + ";";
+                        }
+                        else
+                        {
+                            gx = new Genre { GenreId = g };
+                            db.Entry(gx).State = EntityState.Unchanged;
+                            // db.Genres.Attach(gx);
+                            input.MessageToUser = input.MessageToUser + "Not yet in cache " + g.ToString() + ";";
+                        }
+
+                        movie.Genres.Add(gx);
+
+                        
+
+
+                            // throw new Exception("Working" + sx);
+                        /*var gx = db.Genres.Create();
+                        gx.GenreId = g;                        
+                        db.Entry(gx).Property(x => x.GenreName).IsModified = false;*/
+
+                        // movie.Genres.Add(db.Genres.Find(g));
+                        // movie.Genres.Add(gx);
+
+                        
+                        
                     }
 
                     // http://www.joe-stevens.com/2010/02/17/asp-net-mvc-using-controller-updatemodel-when-using-a-viewmodel/
                     // null will get all properties under TheMovie object, the Version is excluded                 
                     UpdateModel(movie, "TheMovie", includeProperties: null, excludeProperties: new string[] { "Version" });
+                    
 
 
 
@@ -100,7 +162,7 @@ namespace AspNetMvcCheckboxListEf.Controllers
 
 
 
-                    input.MessageToUser = string.Format("Saved. {0}", isNew ? "ID is " + input.TheMovie.MovieId : "");
+                    input.MessageToUser = input.MessageToUser + " " + string.Format("Saved. {0}", isNew ? "ID is " + input.TheMovie.MovieId : "");
 
                 }
                 catch (DbUpdateConcurrencyException)
